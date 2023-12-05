@@ -9,19 +9,9 @@ fn main() {
         .split(' ')
         .map(|v| v.parse().unwrap())
         .collect();
-    println!("building seed list");
-    let mut seeds = Vec::with_capacity(1_000_000);
-    let mut seed_index = 0;
-    while seed_index < seed_map.len() - 1 {
-        for item in seed_map[seed_index]..seed_map[seed_index] + seed_map[seed_index + 1] {
-            seeds.push(item);
-        }
-        seed_index += 2;
-    }
     let mut first = true;
     let mut maps = Maps::default();
     let mut current_map: &mut Vec<MapEntry> = &mut Vec::new();
-    println!("built seed list with {} seeds", seeds.len());
     println!("building maps");
     for line in lines {
         if first || line.trim().is_empty() {
@@ -41,12 +31,18 @@ fn main() {
         current_map.push(entry);
     }
     println!("finding seed locations (this may take a while)");
-    let min = seeds
-        .iter()
-        .map(|seed| maps.seed_to_location(*seed))
-        .min()
-        .unwrap();
-    println!("{min}");
+    let mut seed_index = 0;
+    let mut minimum_seen = usize::MAX;
+    while seed_index < seed_map.len() - 1 {
+        for seed in seed_map[seed_index]..seed_map[seed_index] + seed_map[seed_index + 1] {
+            let location = maps.seed_to_location(seed);
+            if location < minimum_seen {
+                minimum_seen = location;
+            }
+        }
+        seed_index += 2;
+    }
+    println!("{minimum_seen}");
 }
 
 struct MapEntry {
